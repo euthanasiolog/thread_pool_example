@@ -17,8 +17,10 @@ public class MyPool {
         if (instance==null) {
             try {
                 lock.lock();
-                if (instance==null)
-                return new MyPool();
+                if (instance==null) {
+                    instance = new MyPool();
+                    return instance;
+                }
             } finally {
                lock.unlock();
             }
@@ -37,6 +39,4 @@ public class MyPool {
     public boolean[] getPool() {
         return pool;
     }
-
-
 }
