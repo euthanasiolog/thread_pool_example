@@ -13,12 +13,11 @@ public class Controller {
 
         ArrayList<Callable<Integer>> callable = new ArrayList<>();
         for (int i = 0; i<100; i++) {
-            callable.add(new MyThread((int) Math.random()*10+1));
+            callable.add(new MyThread((int) (Math.random()*10+1)));
         }
         try {
-            executorService.invokeAll(callable);
-            executorService.shutdown();
             List<Future<Integer>> future = executorService.invokeAll(callable);
+            executorService.shutdown();
             for (Future<Integer> f:future){
                 try {
                     System.out.println(f.get());
