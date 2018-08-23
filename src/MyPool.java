@@ -11,9 +11,6 @@ public class MyPool {
     private boolean[] pool = new boolean[SIZE];
     private static ReentrantLock lock = new ReentrantLock();
     private MyPool (){
-        for (boolean b:pool){
-            b = false;
-        }
     }
 
     public static MyPool getMyPool (){
