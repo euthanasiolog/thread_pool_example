@@ -1,5 +1,6 @@
 import java.util.concurrent.Callable;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -8,36 +9,38 @@ import java.util.concurrent.locks.ReentrantLock;
 public class MyThread implements Callable<Integer> {
     private int inner;
     private ReentrantLock lock = new ReentrantLock();
-    private MyPool myPool = MyPool.getMyPool();
-    private Semaphore semaphore = myPool.getSemaphore();
-    private boolean[] pool = myPool.getPool();
+    private Semaphore semaphore;
+    private AtomicBoolean[] pool;
 
-    public MyThread (int i) {
+    public MyThread (int i, AtomicBoolean[] pool, Semaphore semaphore) {
         this.inner = i;
+        this.pool = pool;
+        this.semaphore = semaphore;
     }
 
     @Override
     public Integer call() throws Exception {
-        int i = 0;
+        int i;
+        lock.lock();
         try {
             semaphore.acquire();
-            lock.lock();
-            do {
-                if (!pool[i]) {
-                    pool[i] = true;
-                } else i++;
-            } while (pool[i]);
-            System.out.println("thread "+Thread.currentThread().getName()+" get pool "+i);
-            lock.unlock();
-            Thread.sleep(500);
-            lock.lock();
-            pool[i] = false;
-            lock.unlock();
-            semaphore.release();
-            System.out.println("thread "+Thread.currentThread().getName()+" return pool "+i);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+            for (i = 0;i<29;i++){
+                if (!pool[i].get()){
+                    pool[i].set(true);
+                    System.out.println("thread "+Thread.currentThread().getName()+" get pool "+i);
+                    break;
+                }
+            }
+            lock.unlock();
+            Thread.sleep(1000);
+            lock.lock();
+            pool[i].set(false);
+            System.out.println("thread "+Thread.currentThread().getName()+" return pool "+i);
+            lock.unlock();
+            semaphore.release();
         return inner;
     }
 }

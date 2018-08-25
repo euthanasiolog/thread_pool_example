@@ -1,4 +1,4 @@
-import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -6,11 +6,14 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class MyPool {
     private static MyPool instance;
-    private static final int SIZE = 20;
-    private Semaphore semaphore = new Semaphore(SIZE, true);
-    private boolean[] pool = new boolean[SIZE];
+    private static final int SIZE = 30;
+    private AtomicBoolean[] pool = new AtomicBoolean[SIZE];
     private static ReentrantLock lock = new ReentrantLock();
     private MyPool (){
+        for (int i = 0; i < SIZE; i++) {
+            pool[i] = new AtomicBoolean();
+            pool[i].set(false);
+        }
     }
 
     public static MyPool getMyPool (){
@@ -32,11 +35,7 @@ public class MyPool {
         return SIZE;
     }
 
-    public Semaphore getSemaphore() {
-        return semaphore;
-    }
-
-    public boolean[] getPool() {
+    public AtomicBoolean[] getPool() {
         return pool;
     }
 }

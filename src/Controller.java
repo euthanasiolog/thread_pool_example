@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -8,12 +9,15 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class Controller {
     private static ExecutorService executorService = Executors.newCachedThreadPool();
+    private static MyPool myPool = MyPool.getMyPool();
+    private static AtomicBoolean[] pool = myPool.getPool();
+    private static Semaphore semaphore = new Semaphore(MyPool.getSIZE());
 
     public static void main(String[] args) {
 
         ArrayList<Callable<Integer>> callable = new ArrayList<>();
         for (int i = 0; i<100; i++) {
-            callable.add(new MyThread((int) (Math.random()*10+1)));
+            callable.add(new MyThread((int) (Math.random()*10+1), pool, semaphore));
         }
         try {
             List<Future<Integer>> future = executorService.invokeAll(callable);
